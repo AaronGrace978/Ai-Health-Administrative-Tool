@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from app.core.config import settings
-from app.api import auth, patients, dashboard
+from app.api import auth, patients, dashboard, chat
 from app.db.database import engine
 from app.db import models
 import uvicorn
@@ -34,6 +34,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(patients.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
 
 # Serve static files for web interface
 if os.path.exists("web/static"):
