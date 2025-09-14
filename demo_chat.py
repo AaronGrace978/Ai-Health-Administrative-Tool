@@ -143,3 +143,4 @@ if __name__ == "__main__":
         asyncio.run(test_chat_feature())
     else:
         print("\n👋 Demo complete! Start the server to try the chat feature.")
+
