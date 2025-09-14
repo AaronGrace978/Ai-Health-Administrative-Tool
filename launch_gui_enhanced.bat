@@ -50,6 +50,7 @@ echo 🖥️ Launching GUI with enhanced visibility...
 echo 💡 The window should appear prominently on your screen
 echo 💡 If you don't see it, try Alt+Tab to cycle through windows
 echo.
+echo.
 
 "%VENV_PYTHON%" launch_gui_visible.py
 

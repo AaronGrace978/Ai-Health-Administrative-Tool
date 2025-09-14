@@ -23,20 +23,35 @@ def start_backend():
     print("🚀 Starting backend server...")
     
     try:
-        # Start backend in a separate process
+        # Start backend in a separate process with better error handling
         process = subprocess.Popen([
             sys.executable, "main.py"
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         
-        # Wait for backend to start
-        for i in range(10):
+        # Give the process a moment to initialize
+        time.sleep(2)
+        
+        # Wait for backend to start (give it more time)
+        for i in range(20):  # Increased from 10 to 20 seconds
             time.sleep(1)
             if check_backend():
                 print("✅ Backend started successfully!")
                 return True
-            print(f"⏳ Waiting for backend... ({i+1}/10)")
+            print(f"⏳ Waiting for backend... ({i+1}/20)")
         
-        print("❌ Backend failed to start")
+        # If we get here, the backend didn't start
+        print("❌ Backend failed to start after 20 seconds")
+        
+        # Try to get error output from the process
+        try:
+            stdout, stderr = process.communicate(timeout=1)
+            if stderr:
+                print("🔍 Backend error output:")
+                print(stderr)
+        except:
+            pass
+            
+        print("💡 Try starting the backend manually: python main.py")
         return False
         
     except Exception as e:
