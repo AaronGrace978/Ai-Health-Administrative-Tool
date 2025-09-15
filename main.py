@@ -2,8 +2,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from contextlib import asynccontextmanager
 from app.core.config import settings
-from app.api import auth, patients, dashboard, chat
+from app.api import auth, patients, dashboard, chat, billing
 from app.db.database import engine
 from app.db import models
 import uvicorn
@@ -12,13 +13,28 @@ import os
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan event handler"""
+    # Startup
+    print(f"🚀 Starting {settings.app_name} v{settings.app_version}")
+    print(f"📊 API Documentation: http://localhost:8000/api/docs")
+    print(f"🌐 Web Interface: http://localhost:8000")
+    print(f"🤖 AI Model: {settings.ollama_model}")
+    
+    yield
+    
+    # Shutdown
+    print("🛑 Shutting down Health Administrative Tool")
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="A comprehensive healthcare administrative system with AI integration",
     docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    redoc_url="/api/redoc",
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -35,6 +51,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(patients.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(billing.router, prefix="/api")
 
 # Serve static files for web interface
 if os.path.exists("web/static"):
@@ -96,19 +113,6 @@ def health_check():
         "version": settings.app_version,
         "debug": settings.debug
     }
-
-@app.on_event("startup")
-async def startup_event():
-    """Application startup event"""
-    print(f"🚀 Starting {settings.app_name} v{settings.app_version}")
-    print(f"📊 API Documentation: http://localhost:8000/api/docs")
-    print(f"🌐 Web Interface: http://localhost:8000")
-    print(f"🤖 AI Model: {settings.ollama_model}")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Application shutdown event"""
-    print("🛑 Shutting down Health Administrative Tool")
 
 if __name__ == "__main__":
     uvicorn.run(
